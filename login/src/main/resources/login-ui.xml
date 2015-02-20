@@ -183,11 +183,11 @@
   <oauth:web-expression-handler id="oauthWebExpressionHandler" />
 
   <bean id="brand" class="org.cloudfoundry.identity.uaa.login.BrandFactory">
-    <property name="brandName" value="${login.brand}" />
-    <property name="serviceName" value="${login.brandDetail.serviceName}" />
-    <property name="accountName" value="${login.brandDetail.accountName}" />
-    <property name="accountPhrase" value="${login.brandDetail.accountPhrase}" />
-    <property name="adminEmailAddress" value="${login.brandDetail.adminEmailAddress}" />
+    <property name="brandName" value="${login.brand:oss}" />
+    <property name="serviceName" value="${login.brandDetail.serviceName:#{null}}" />
+    <property name="accountName" value="${login.brandDetail.accountName:#{null}}" />
+    <property name="accountPhrase" value="${login.brandDetail.accountPhrase:#{null}}" />
+    <property name="adminEmailAddress" value="${login.brandDetail.adminEmailAddress:#{null}}" />
   </bean>
 
   <bean id="approvalsService" class="org.cloudfoundry.identity.uaa.login.LoginUaaApprovalsService"/>
