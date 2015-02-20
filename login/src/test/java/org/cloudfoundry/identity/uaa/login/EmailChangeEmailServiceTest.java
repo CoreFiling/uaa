@@ -53,7 +53,7 @@ public class EmailChangeEmailServiceTest {
         SecurityContextHolder.clearContext();
         endpoints = mock(ChangeEmailEndpoints.class);
         messageService = mock(EmailService.class);
-        emailChangeEmailService = new EmailChangeEmailService(templateEngine, messageService, "pivotal", endpoints);
+        emailChangeEmailService = new EmailChangeEmailService(templateEngine, messageService, BrandFactory.PIVOTAL, endpoints);
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.setProtocol("http");
         request.setContextPath("/login");
@@ -78,7 +78,7 @@ public class EmailChangeEmailServiceTest {
 
     @Test
     public void testBeginEmailChangeWithOssBrand() throws Exception {
-        emailChangeEmailService = new EmailChangeEmailService(templateEngine, messageService, "oss", endpoints);
+        emailChangeEmailService = new EmailChangeEmailService(templateEngine, messageService, BrandFactory.OSS, endpoints);
 
         when(endpoints.generateEmailVerificationCode(any(ChangeEmailEndpoints.EmailChange.class))).thenReturn(new ResponseEntity<>("the_secret_code", HttpStatus.CREATED));
         emailChangeEmailService.beginEmailChange("user-001", "user@example.com", "new@example.com", "app");

@@ -72,7 +72,7 @@ public class EmailResetPasswordServiceTests {
         scimUserProvisioning = mock(ScimUserProvisioning.class);
         codeStore = mock(ExpiringCodeStore.class);
         passwordResetEndpoints = new PasswordResetEndpoints(new ObjectMapper(), scimUserProvisioning, codeStore);
-        emailResetPasswordService = new EmailResetPasswordService(templateEngine, messageService, passwordResetEndpoints, "http://uaa.example.com/uaa", "pivotal");
+        emailResetPasswordService = new EmailResetPasswordService(templateEngine, messageService, passwordResetEndpoints, "http://uaa.example.com/uaa", BrandFactory.PIVOTAL);
     }
 
     @After
@@ -99,7 +99,7 @@ public class EmailResetPasswordServiceTests {
         Mockito.verify(messageService).sendMessage(eq("user-id-001"),
             eq("user@example.com"),
             eq(MessageType.PASSWORD_RESET),
-            eq("Pivotal account password reset request"),
+            eq("Pivotal ID password reset request"),
             contains("<a href=\"http://localhost/login/reset_password?code=code&amp;email=user%40example.com\">Reset your password</a>")
         );
     }
@@ -123,7 +123,7 @@ public class EmailResetPasswordServiceTests {
         Mockito.verify(messageService).sendMessage(eq("user-id-001"),
             eq("user@example.com"),
             eq(MessageType.PASSWORD_RESET),
-            eq("Pivotal account password reset request"),
+            eq("Pivotal ID password reset request"),
             contains("Your account credentials for localhost are managed by an external service. Please contact your administrator for password recovery requests.")
         );
     }

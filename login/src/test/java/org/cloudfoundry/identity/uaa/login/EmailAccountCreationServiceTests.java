@@ -83,7 +83,7 @@ public class EmailAccountCreationServiceTests {
             scimUserProvisioning,
             clientDetailsService,
             "http://uaa.example.com",
-            "pivotal",
+            BrandFactory.PIVOTAL,
             "http://login.example.com"
         );
     }
@@ -126,7 +126,7 @@ public class EmailAccountCreationServiceTests {
             scimUserProvisioning,
             clientDetailsService,
             "http://uaa.example.com",
-            "oss",
+            BrandFactory.OSS,
             "http://login.example.com");
 
         setUpForSuccess();

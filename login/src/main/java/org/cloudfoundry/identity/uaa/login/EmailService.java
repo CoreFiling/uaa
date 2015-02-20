@@ -18,18 +18,22 @@ public class EmailService implements MessageService {
 
     private final JavaMailSender mailSender;
     private final String loginUrl;
-    private final String brand;
+    private final Brand brand;
 
-    public EmailService(JavaMailSender mailSender, String loginUrl, String brand) {
+    public EmailService(JavaMailSender mailSender, String loginUrl, Brand brand) {
         this.mailSender = mailSender;
         this.loginUrl = loginUrl;
         this.brand = brand;
     }
 
     private Address[] getSenderAddresses() throws AddressException, UnsupportedEncodingException {
-        String host = UriComponentsBuilder.fromHttpUrl(loginUrl).build().getHost();
-        String name = brand.equals("pivotal") ? "Pivotal" : "Cloud Foundry";
-        return new Address[]{new InternetAddress("admin@" + host, name)};
+        String name = brand.getServiceName();
+        String adminAddress = brand.getAdminEmailAddress();
+        if (adminAddress == null) {
+          String host = UriComponentsBuilder.fromHttpUrl(loginUrl).build().getHost();
+          adminAddress = "admin@" + host;
+        }
+        return new Address[]{new InternetAddress(adminAddress, name)};
     }
 
     @Override

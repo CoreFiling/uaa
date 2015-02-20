@@ -25,6 +25,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -44,9 +45,9 @@ public class EmailResetPasswordService implements ResetPasswordService {
     private final MessageService messageService;
     private final PasswordResetEndpoints passwordResetEndpoints;
     private final String uaaBaseUrl;
-    private final String brand;
+    private final Brand brand;
 
-    public EmailResetPasswordService(TemplateEngine templateEngine, MessageService messageService, PasswordResetEndpoints passwordResetEndpoints, String uaaBaseUrl, String brand) {
+    public EmailResetPasswordService(TemplateEngine templateEngine, MessageService messageService, PasswordResetEndpoints passwordResetEndpoints, String uaaBaseUrl, Brand brand) {
         this.templateEngine = templateEngine;
         this.messageService = messageService;
         this.passwordResetEndpoints = passwordResetEndpoints;
@@ -95,7 +96,7 @@ public class EmailResetPasswordService implements ResetPasswordService {
     }
 
     private String getSubjectText() {
-        return brand.equals("pivotal") ? "Pivotal account password reset request" : "Account password reset request";
+        return StringUtils.capitalize(brand.getAccountName()) + " password reset request";
     }
 
     @Override
@@ -120,7 +121,7 @@ public class EmailResetPasswordService implements ResetPasswordService {
         String resetUrl = ServletUriComponentsBuilder.fromCurrentContextPath().path("/reset_password").build().toUriString();
 
         final Context ctx = new Context();
-        ctx.setVariable("serviceName", brand.equals("pivotal") ? "Pivotal " : "");
+        ctx.setVariable("accountName", brand.getAccountName());
         ctx.setVariable("code", code);
         ctx.setVariable("email", email);
         ctx.setVariable("resetUrl", resetUrl);
@@ -131,7 +132,7 @@ public class EmailResetPasswordService implements ResetPasswordService {
         String hostname = ServletUriComponentsBuilder.fromCurrentContextPath().build().getHost();
 
         final Context ctx = new Context();
-        ctx.setVariable("serviceName", brand.equals("pivotal") ? "Pivotal " : "");
+        ctx.setVariable("accountName", brand.getAccountName());
         ctx.setVariable("email", email);
         ctx.setVariable("hostname", hostname);
         return templateEngine.process("reset_password_unavailable", ctx);

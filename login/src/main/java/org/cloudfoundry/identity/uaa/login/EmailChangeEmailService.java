@@ -17,10 +17,10 @@ public class EmailChangeEmailService implements ChangeEmailService {
 
     private final TemplateEngine templateEngine;
     private final MessageService messageService;
-    private final String brand;
+    private final Brand brand;
     private final ChangeEmailEndpoints endpoints;
 
-    public EmailChangeEmailService(TemplateEngine templateEngine, MessageService messageService, String brand, ChangeEmailEndpoints endpoints) {
+    public EmailChangeEmailService(TemplateEngine templateEngine, MessageService messageService, Brand brand, ChangeEmailEndpoints endpoints) {
         this.templateEngine = templateEngine;
         this.messageService = messageService;
         this.brand = brand;
@@ -83,8 +83,8 @@ public class EmailChangeEmailService implements ChangeEmailService {
         String verifyUrl = ServletUriComponentsBuilder.fromCurrentContextPath().path("/verify_email").build().toUriString();
 
         final Context ctx = new Context();
-        ctx.setVariable("serviceName", brand.equals("pivotal") ? "Pivotal " : "Cloud Foundry");
-        ctx.setVariable("servicePhrase", brand.equals("pivotal") ? "a Pivotal ID" : "an account");
+        ctx.setVariable("serviceName", brand.getServiceName());
+        ctx.setVariable("accountPhrase", brand.getAccountPhrase());
         ctx.setVariable("code", code);
         ctx.setVariable("newEmail", newEmail);
         ctx.setVariable("email", email);

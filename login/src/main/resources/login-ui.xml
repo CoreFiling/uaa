@@ -182,6 +182,14 @@
 
   <oauth:web-expression-handler id="oauthWebExpressionHandler" />
 
+  <bean id="brand" class="org.cloudfoundry.identity.uaa.login.BrandFactory">
+    <property name="brandName" value="${login.brand}" />
+    <property name="serviceName" value="${login.brandDetail.serviceName}" />
+    <property name="accountName" value="${login.brandDetail.accountName}" />
+    <property name="accountPhrase" value="${login.brandDetail.accountPhrase}" />
+    <property name="adminEmailAddress" value="${login.brandDetail.adminEmailAddress}" />
+  </bean>
+
   <bean id="approvalsService" class="org.cloudfoundry.identity.uaa.login.LoginUaaApprovalsService"/>
 
   <bean id="approvalsController" class="org.cloudfoundry.identity.uaa.login.ProfileController" />
@@ -269,22 +277,45 @@
     <bean id="springResourceResourceResolver"
           class="org.thymeleaf.spring4.resourceresolver.SpringResourceResourceResolver"/>
 
-    <bean id="webTemplateResolver" class="org.thymeleaf.templateresolver.TemplateResolver">
+    <bean id="customWebTemplateResolver" class="org.thymeleaf.templateresolver.TemplateResolver">
+        <property name="resourceResolver" ref="springResourceResourceResolver"/>
+        <property name="prefix" value="${login.templates:classpath:/templates}/web/" />
+        <property name="suffix" value=".html"/>
+        <property name="templateMode" value="HTML5"/>
+        <property name="order" value="1"/>
+    </bean>
+
+    <bean id="defaultWebTemplateResolver" class="org.thymeleaf.templateresolver.TemplateResolver">
         <property name="resourceResolver" ref="springResourceResourceResolver"/>
         <property name="prefix" value="classpath:/templates/web/" />
         <property name="suffix" value=".html"/>
         <property name="templateMode" value="HTML5"/>
+        <property name="order" value="2"/>
     </bean>
 
-    <bean id="mailTemplateResolver" class="org.thymeleaf.templateresolver.TemplateResolver">
+    <bean id="customMailTemplateResolver" class="org.thymeleaf.templateresolver.TemplateResolver">
+        <property name="resourceResolver" ref="springResourceResourceResolver"/>
+        <property name="prefix" value="${login.templates:classpath:/templates}/mail/" />
+        <property name="suffix" value=".html" />
+        <property name="templateMode" value="HTML5" />
+        <property name="order" value="1"/>
+    </bean>
+
+    <bean id="defaultMailTemplateResolver" class="org.thymeleaf.templateresolver.TemplateResolver">
         <property name="resourceResolver" ref="springResourceResourceResolver"/>
         <property name="prefix" value="classpath:/templates/mail/" />
         <property name="suffix" value=".html" />
         <property name="templateMode" value="HTML5" />
+        <property name="order" value="2"/>
     </bean>
 
     <bean id="webTemplateEngine" class="org.thymeleaf.spring4.SpringTemplateEngine">
-        <property name="templateResolver" ref="webTemplateResolver" />
+        <property name="templateResolvers">
+        <list>
+          <ref bean="customWebTemplateResolver" />
+          <ref bean="defaultWebTemplateResolver" />
+        </list>
+      </property>
         <property name="additionalDialects">
             <set>
                 <bean class="nz.net.ultraq.thymeleaf.LayoutDialect" />
@@ -294,7 +325,12 @@
     </bean>
 
     <bean id="mailTemplateEngine" class="org.thymeleaf.spring4.SpringTemplateEngine">
-        <property name="templateResolver" ref="mailTemplateResolver" />
+      <property name="templateResolvers">
+        <list>
+          <ref bean="customMailTemplateResolver" />
+          <ref bean="defaultMailTemplateResolver" />
+        </list>
+      </property>
     </bean>
 
     <bean id="viewResolver" class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
@@ -327,7 +363,7 @@
     <bean id="emailService" class="org.cloudfoundry.identity.uaa.login.EmailService">
         <constructor-arg index="0" ref="#{T(org.springframework.util.StringUtils).hasText('${smtp.host:}') ? 'smtpJavaMailSender' : 'fakeJavaMailSender'}"/>
         <constructor-arg index="1" value="${login.url:http://localhost:8080/uaa}"/>
-        <constructor-arg index="2" value="${login.brand:oss}"/>
+        <constructor-arg index="2" ref="brand" />
     </bean>
 
     <bean id="smtpJavaMailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
@@ -355,14 +391,14 @@
         <constructor-arg ref="scimUserProvisioning"/>
         <constructor-arg ref="jdbcClientDetailsService"/>
         <constructor-arg ref="uaaUrl"/>
-        <constructor-arg value="${login.brand:oss}"/>
+        <constructor-arg ref="brand"/>
         <constructor-arg value="${login.url:http://localhost:8080/uaa}"/>
     </bean>
 
     <bean id="invitationsService" class="org.cloudfoundry.identity.uaa.login.EmailInvitationsService">
         <constructor-arg ref="mailTemplateEngine"/>
         <constructor-arg ref="messageService"/>
-        <constructor-arg value="${login.brand:oss}"/>
+        <constructor-arg ref="brand"/>
     </bean>
 
     <bean id="changePasswordService" class="org.cloudfoundry.identity.uaa.login.UaaChangePasswordService">
@@ -378,14 +414,14 @@
         <constructor-arg ref="messageService"/>
         <constructor-arg ref="passwordResetEndpoints"/>
         <constructor-arg ref="uaaUrl"/>
-        <constructor-arg value="${login.brand:oss}"/>
+        <constructor-arg ref="brand"/>
     </bean>
 
     <bean id="changeEmailService" class="org.cloudfoundry.identity.uaa.login.EmailChangeEmailService">
         <constructor-arg ref="mailTemplateEngine"/>
         <constructor-arg ref="messageService"/>
         <constructor-arg ref="changeEmailEndpoints"/>
-        <constructor-arg value="${login.brand:oss}"/>
+        <constructor-arg ref="brand"/>
     </bean>
 
     <bean id="resetPasswordController" class="org.cloudfoundry.identity.uaa.login.ResetPasswordController">

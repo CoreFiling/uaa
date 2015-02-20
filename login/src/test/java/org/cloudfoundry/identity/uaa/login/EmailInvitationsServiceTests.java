@@ -179,7 +179,7 @@ public class EmailInvitationsServiceTests {
 
     @Test
     public void testSendInviteEmailWithOSSBrand() throws Exception {
-        emailInvitationsService.setBrand("oss");
+        emailInvitationsService.setBrand(BrandFactory.OSS);
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.setProtocol("http");
         request.setContextPath("/login");
@@ -265,7 +265,7 @@ public class EmailInvitationsServiceTests {
 
         @Bean
         EmailInvitationsService emailInvitationsService() {
-            return new EmailInvitationsService(templateEngine, messageService(), "pivotal");
+            return new EmailInvitationsService(templateEngine, messageService(), BrandFactory.PIVOTAL);
         }
 
         @Bean

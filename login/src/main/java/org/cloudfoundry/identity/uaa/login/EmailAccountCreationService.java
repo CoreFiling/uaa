@@ -35,7 +35,7 @@ public class EmailAccountCreationService implements AccountCreationService {
     private final SpringTemplateEngine templateEngine;
     private final MessageService messageService;
     private final String uaaBaseUrl;
-    private final String brand;
+    private final Brand brand;
     private final ObjectMapper objectMapper;
     private final String baseUrl;
     private final ExpiringCodeStore codeStore;
@@ -50,7 +50,7 @@ public class EmailAccountCreationService implements AccountCreationService {
         ScimUserProvisioning scimUserProvisioning,
         ClientDetailsService clientDetailsService,
         String uaaBaseUrl,
-        String brand,
+        Brand brand,
         String baseUrl) {
 
         this.objectMapper = objectMapper;
@@ -174,15 +174,15 @@ public class EmailAccountCreationService implements AccountCreationService {
     }
     
     private String getSubjectText() {
-        return brand.equals("pivotal") ? "Activate your Pivotal ID" : "Activate your account";
+        return "Activate your " + brand.getAccountName();
     }
 
     private String getEmailHtml(String code, String email) {
         String accountsUrl = baseUrl + "/verify_user";
 
         final Context ctx = new Context();
-        ctx.setVariable("serviceName", brand.equals("pivotal") ? "Pivotal" : "Cloud Foundry");
-        ctx.setVariable("servicePhrase", brand.equals("pivotal") ? "a Pivotal ID" : "an account");
+        ctx.setVariable("serviceName", brand.getServiceName());
+        ctx.setVariable("accountPhrase", brand.getAccountPhrase());
         ctx.setVariable("code", code);
         ctx.setVariable("email", email);
         ctx.setVariable("accountsUrl", accountsUrl);
