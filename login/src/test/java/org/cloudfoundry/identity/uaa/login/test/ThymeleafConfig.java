@@ -12,6 +12,14 @@
  *******************************************************************************/
 package org.cloudfoundry.identity.uaa.login.test;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
+import nz.net.ultraq.thymeleaf.LayoutDialect;
+
+import org.cloudfoundry.identity.uaa.login.Brand;
+import org.cloudfoundry.identity.uaa.login.BrandFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.thymeleaf.dialect.IDialect;
@@ -21,17 +29,19 @@ import org.thymeleaf.spring4.resourceresolver.SpringResourceResourceResolver;
 import org.thymeleaf.spring4.view.ThymeleafViewResolver;
 import org.thymeleaf.templateresolver.TemplateResolver;
 
-import java.util.HashSet;
-import java.util.Set;
-import nz.net.ultraq.thymeleaf.LayoutDialect;
-
 @Configuration
 public class ThymeleafConfig {
+
+    @Bean
+    public Brand brand() {
+      return BrandFactory.OSS;
+    }
 
     @Bean
     public ThymeleafViewResolver thymeleafViewResolver() {
         ThymeleafViewResolver viewResolver = new ThymeleafViewResolver();
         viewResolver.setTemplateEngine(webTemplateEngine());
+        viewResolver.setStaticVariables(Collections.singletonMap("brand", brand()));
         return viewResolver;
     }
 

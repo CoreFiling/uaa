@@ -181,8 +181,7 @@ public class EmailAccountCreationService implements AccountCreationService {
         String accountsUrl = baseUrl + "/verify_user";
 
         final Context ctx = new Context();
-        ctx.setVariable("serviceName", brand.getServiceName());
-        ctx.setVariable("accountPhrase", brand.getAccountPhrase());
+        ctx.setVariable("brand", brand);
         ctx.setVariable("code", code);
         ctx.setVariable("email", email);
         ctx.setVariable("accountsUrl", accountsUrl);

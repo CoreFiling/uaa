@@ -11,6 +11,7 @@ import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+
 import java.io.UnsupportedEncodingException;
 
 public class EmailService implements MessageService {
@@ -19,21 +20,23 @@ public class EmailService implements MessageService {
     private final JavaMailSender mailSender;
     private final String loginUrl;
     private final Brand brand;
+    private final String senderAddressIfSpecified;
 
-    public EmailService(JavaMailSender mailSender, String loginUrl, Brand brand) {
+    public EmailService(JavaMailSender mailSender, String loginUrl, String senderAddressIfSpecified, Brand brand) {
         this.mailSender = mailSender;
         this.loginUrl = loginUrl;
+        this.senderAddressIfSpecified = senderAddressIfSpecified;
         this.brand = brand;
     }
 
     private Address[] getSenderAddresses() throws AddressException, UnsupportedEncodingException {
         String name = brand.getServiceName();
-        String adminAddress = brand.getAdminEmailAddress();
-        if (adminAddress == null) {
+        String senderAddress = senderAddressIfSpecified;
+        if (senderAddress == null) {
           String host = UriComponentsBuilder.fromHttpUrl(loginUrl).build().getHost();
-          adminAddress = "admin@" + host;
+          senderAddress = "admin@" + host;
         }
-        return new Address[]{new InternetAddress(adminAddress, name)};
+        return new Address[]{new InternetAddress(senderAddress, name)};
     }
 
     @Override

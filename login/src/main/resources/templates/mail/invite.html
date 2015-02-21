@@ -5,7 +5,7 @@
 </head>
 <body>
 <p>
-   <th:block th:text="${currentUser}"></th:block> has invited you to join <th:block th:text="${serviceName}"></th:block>
+   <th:block th:text="${currentUser}"></th:block> has invited you to join <th:block th:text="${brand.serviceName}"></th:block>
 </p>
 <p>
     <a href="http://login.example.com/invitations/accept"
@@ -14,7 +14,7 @@
 </p>
 <p>
     Thank you,<br />
-    <th:block th:text="${serviceName}">The Administration</th:block>
+    <th:block th:text="${brand.serviceName}">The Administration</th:block>
 </p>
 </body>
 </html>

@@ -78,7 +78,7 @@ public class EmailInvitationsService implements InvitationsService {
     private String getEmailHtml(String currentUser, String code) {
         String accountsUrl = ServletUriComponentsBuilder.fromCurrentContextPath().path("/invitations/accept").build().toUriString();
         final Context ctx = new Context();
-        ctx.setVariable("serviceName", brand.getServiceName());
+        ctx.setVariable("brand", brand);
         ctx.setVariable("code", code);
         ctx.setVariable("currentUser", currentUser);
         ctx.setVariable("accountsUrl", accountsUrl);

@@ -184,10 +184,9 @@
 
   <bean id="brand" class="org.cloudfoundry.identity.uaa.login.BrandFactory">
     <property name="brandName" value="${login.brand:oss}" />
-    <property name="serviceName" value="${login.brandDetail.serviceName:#{null}}" />
-    <property name="accountName" value="${login.brandDetail.accountName:#{null}}" />
-    <property name="accountPhrase" value="${login.brandDetail.accountPhrase:#{null}}" />
-    <property name="adminEmailAddress" value="${login.brandDetail.adminEmailAddress:#{null}}" />
+    <property name="serviceName" value="${login.brandProperties.serviceName:#{null}}" />
+    <property name="accountName" value="${login.brandProperties.accountName:#{null}}" />
+    <property name="accountPhrase" value="${login.brandProperties.accountPhrase:#{null}}" />
   </bean>
 
   <bean id="approvalsService" class="org.cloudfoundry.identity.uaa.login.LoginUaaApprovalsService"/>
@@ -279,7 +278,7 @@
 
     <bean id="customWebTemplateResolver" class="org.thymeleaf.templateresolver.TemplateResolver">
         <property name="resourceResolver" ref="springResourceResourceResolver"/>
-        <property name="prefix" value="${login.templates:classpath:/templates}/web/" />
+        <property name="prefix" value="${login.templatesUrl:classpath:/templates}/web/" />
         <property name="suffix" value=".html"/>
         <property name="templateMode" value="HTML5"/>
         <property name="order" value="1"/>
@@ -295,7 +294,7 @@
 
     <bean id="customMailTemplateResolver" class="org.thymeleaf.templateresolver.TemplateResolver">
         <property name="resourceResolver" ref="springResourceResourceResolver"/>
-        <property name="prefix" value="${login.templates:classpath:/templates}/mail/" />
+        <property name="prefix" value="${login.templatesUrl:classpath:/templates}/mail/" />
         <property name="suffix" value=".html" />
         <property name="templateMode" value="HTML5" />
         <property name="order" value="1"/>
@@ -343,6 +342,11 @@
             <list>
                 <bean class="org.thymeleaf.spring4.view.ThymeleafViewResolver">
                     <property name="templateEngine" ref="webTemplateEngine" />
+                    <property name="staticVariables">
+                      <map>
+                        <entry key="brand" value-ref="brand" />
+                      </map>
+                    </property>
                 </bean>
                 <bean class="org.cloudfoundry.identity.uaa.web.ForwardAwareInternalResourceViewResolver">
                 </bean>
@@ -363,7 +367,8 @@
     <bean id="emailService" class="org.cloudfoundry.identity.uaa.login.EmailService">
         <constructor-arg index="0" ref="#{T(org.springframework.util.StringUtils).hasText('${smtp.host:}') ? 'smtpJavaMailSender' : 'fakeJavaMailSender'}"/>
         <constructor-arg index="1" value="${login.url:http://localhost:8080/uaa}"/>
-        <constructor-arg index="2" ref="brand" />
+        <constructor-arg index="2" value="${smtp.senderAddress:#{null}}"/>
+        <constructor-arg index="3" ref="brand" />
     </bean>
 
     <bean id="smtpJavaMailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">

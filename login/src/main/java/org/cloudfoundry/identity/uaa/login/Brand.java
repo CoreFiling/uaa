@@ -3,21 +3,15 @@ package org.cloudfoundry.identity.uaa.login;
 public class Brand {
 
   private final String serviceName;
-
   private final String accountName;
-
   private final String accountPhrase;
-
-  private final String adminEmailAddress;
-
   private final String name;
   
-  public Brand(String name, String serviceName, String accountName, String accountPhrase, final String adminEmailAddress) {
+  public Brand(String name, String serviceName, String accountName, String accountPhrase) {
     this.name = name;
     this.serviceName = serviceName;
     this.accountName = accountName;
     this.accountPhrase = accountPhrase;
-    this.adminEmailAddress = adminEmailAddress;
   }
   
   /**
@@ -38,10 +32,6 @@ public class Brand {
   
   public String getAccountPhrase() {
     return accountPhrase;
-  }
-
-  public String getAdminEmailAddress() {
-    return adminEmailAddress;
   }
   
 }

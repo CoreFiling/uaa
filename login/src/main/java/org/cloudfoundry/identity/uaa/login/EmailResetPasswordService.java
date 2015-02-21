@@ -121,7 +121,7 @@ public class EmailResetPasswordService implements ResetPasswordService {
         String resetUrl = ServletUriComponentsBuilder.fromCurrentContextPath().path("/reset_password").build().toUriString();
 
         final Context ctx = new Context();
-        ctx.setVariable("accountName", brand.getAccountName());
+        ctx.setVariable("brand", brand);
         ctx.setVariable("code", code);
         ctx.setVariable("email", email);
         ctx.setVariable("resetUrl", resetUrl);
@@ -132,7 +132,7 @@ public class EmailResetPasswordService implements ResetPasswordService {
         String hostname = ServletUriComponentsBuilder.fromCurrentContextPath().build().getHost();
 
         final Context ctx = new Context();
-        ctx.setVariable("accountName", brand.getAccountName());
+        ctx.setVariable("brand", brand);
         ctx.setVariable("email", email);
         ctx.setVariable("hostname", hostname);
         return templateEngine.process("reset_password_unavailable", ctx);

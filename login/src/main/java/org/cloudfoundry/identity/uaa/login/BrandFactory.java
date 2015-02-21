@@ -11,8 +11,8 @@ import org.springframework.beans.factory.config.AbstractFactoryBean;
 public class BrandFactory extends AbstractFactoryBean<Brand> {
 
   // These are exposed for the sake of tests.
-  public static final Brand PIVOTAL = new Brand("pivotal", "Pivotal", "Pivotal ID", "a Pivotal ID", null);
-  public static final Brand OSS = new Brand("oss", "Cloud Foundry", "account", "an account", null);
+  public static final Brand PIVOTAL = new Brand("pivotal", "Pivotal", "Pivotal ID", "a Pivotal ID");
+  public static final Brand OSS = new Brand("oss", "Cloud Foundry", "account", "an account");
 
   private static final List<Brand> BUILT_IN = Arrays.asList(PIVOTAL, OSS);
   
@@ -20,7 +20,6 @@ public class BrandFactory extends AbstractFactoryBean<Brand> {
   private String serviceName;
   private String accountName;
   private String accountPhrase;
-  private String adminEmailAddress;
 
   @Override
   public Class<?> getObjectType() {
@@ -43,24 +42,20 @@ public class BrandFactory extends AbstractFactoryBean<Brand> {
     this.accountPhrase = accountPhrase;
   }
   
-  public void setAdminEmailAddress(String adminEmailAddress) {
-    this.adminEmailAddress = adminEmailAddress;
-  }
-  
   @Override
   protected Brand createInstance() throws Exception {
     for (Brand brand : BUILT_IN) {
       if (brand.getBrandName().equals(name)) {
-        if (serviceName != null || accountName != null || accountPhrase != null || adminEmailAddress != null) {
+        if (serviceName != null || accountName != null || accountPhrase != null) {
           throw new IllegalStateException("For built-in brands (pivotal/oss) only provide the login.brand setting."); 
         }
         return brand;
       }
     }
-    if (serviceName == null || accountName == null || accountPhrase == null || adminEmailAddress == null) {
-      throw new IllegalStateException("For custom brand '" + name + "' all settings are required: serviceName, accountName, accountPhrase, adminEmailAddress"); 
+    if (serviceName == null || accountName == null || accountPhrase == null) {
+      throw new IllegalStateException("For custom brand '" + name + "' all brandProperties children required: serviceName, accountName and accountPhrase"); 
     }
-    return new Brand(name, serviceName, accountName, accountPhrase, adminEmailAddress);
+    return new Brand(name, serviceName, accountName, accountPhrase);
   }
   
 }
