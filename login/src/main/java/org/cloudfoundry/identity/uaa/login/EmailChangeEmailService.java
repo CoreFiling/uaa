@@ -83,8 +83,7 @@ public class EmailChangeEmailService implements ChangeEmailService {
         String verifyUrl = ServletUriComponentsBuilder.fromCurrentContextPath().path("/verify_email").build().toUriString();
 
         final Context ctx = new Context();
-        ctx.setVariable("serviceName", brand.getServiceName());
-        ctx.setVariable("accountPhrase", brand.getAccountPhrase());
+        ctx.setVariable("brand", brand);
         ctx.setVariable("code", code);
         ctx.setVariable("newEmail", newEmail);
         ctx.setVariable("email", email);

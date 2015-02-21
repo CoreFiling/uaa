@@ -1,7 +1,19 @@
 package org.cloudfoundry.identity.uaa.login;
 
-import com.dumbster.smtp.SimpleSmtpServer;
-import com.googlecode.flyway.core.Flyway;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.not;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.xpath;
+
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.cloudfoundry.identity.uaa.authentication.Origin;
 import org.cloudfoundry.identity.uaa.authentication.UaaPrincipal;
 import org.cloudfoundry.identity.uaa.codestore.JdbcExpiringCodeStore;
@@ -9,7 +21,6 @@ import org.cloudfoundry.identity.uaa.test.YamlServletProfileInitializerContextIn
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.mock.env.MockEnvironment;
@@ -23,19 +34,8 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.support.XmlWebApplicationContext;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.not;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.xpath;
+import com.dumbster.smtp.SimpleSmtpServer;
+import com.googlecode.flyway.core.Flyway;
 
 public class AccountsControllerIntegrationTest {
 
@@ -50,11 +50,12 @@ public class AccountsControllerIntegrationTest {
         mailServer = SimpleSmtpServer.start(2525);
     }
 
-    @Before
-    public void setUp() throws Exception {
+    public void mockMvcWithBrand(final String brand) throws Exception {
         webApplicationContext = new XmlWebApplicationContext();
-        webApplicationContext.setEnvironment(new MockEnvironment());
+        MockEnvironment environment = new MockEnvironment();
+        webApplicationContext.setEnvironment(environment);
         new YamlServletProfileInitializerContextInitializer().initializeContext(webApplicationContext, "uaa.yml,login.yml");
+        environment.setProperty("login.brand", brand);
         webApplicationContext.setConfigLocation("file:./src/main/webapp/WEB-INF/spring-servlet.xml");
         webApplicationContext.refresh();
         FilterChainProxy springSecurityFilterChain = webApplicationContext.getBean("springSecurityFilterChain", FilterChainProxy.class);
@@ -80,7 +81,7 @@ public class AccountsControllerIntegrationTest {
 
     @Test
     public void testCreateActivationEmailPage() throws Exception {
-        ((MockEnvironment) webApplicationContext.getEnvironment()).setProperty("login.brand", "oss");
+        mockMvcWithBrand("oss");
 
         mockMvc.perform(get("/create_account.do"))
                 .andExpect(content().string(containsString("Create your account")))
@@ -89,7 +90,7 @@ public class AccountsControllerIntegrationTest {
 
     @Test
     public void testCreateActivationEmailPageWithPivotalBrand() throws Exception {
-        ((MockEnvironment) webApplicationContext.getEnvironment()).setProperty("login.brand", "pivotal");
+        mockMvcWithBrand("pivotal");
 
         mockMvc.perform(get("/create_account.do"))
             .andExpect(content().string(containsString("Create your Pivotal ID")))
@@ -98,7 +99,7 @@ public class AccountsControllerIntegrationTest {
 
     @Test
     public void testActivationEmailSentPage() throws Exception {
-        ((MockEnvironment) webApplicationContext.getEnvironment()).setProperty("login.brand", "oss");
+        mockMvcWithBrand("oss");
 
         mockMvc.perform(get("/accounts/email_sent"))
                 .andExpect(status().isOk())
@@ -109,7 +110,7 @@ public class AccountsControllerIntegrationTest {
 
     @Test
     public void testActivationEmailSentPageWithPivotalBrand() throws Exception {
-        ((MockEnvironment) webApplicationContext.getEnvironment()).setProperty("login.brand", "pivotal");
+        mockMvcWithBrand("pivotal");
 
         mockMvc.perform(get("/accounts/email_sent"))
                 .andExpect(status().isOk())
@@ -120,6 +121,8 @@ public class AccountsControllerIntegrationTest {
 
     @Test
     public void testCreatingAnAccount() throws Exception {
+        mockMvcWithBrand("oss");
+
         PredictableGenerator generator = new PredictableGenerator();
         JdbcExpiringCodeStore store = webApplicationContext.getBean(JdbcExpiringCodeStore.class);
         store.setGenerator(generator);
@@ -148,6 +151,8 @@ public class AccountsControllerIntegrationTest {
 
     @Test
     public void testCreatingAnAccountWithAnEmptyClientId() throws Exception {
+        mockMvcWithBrand("oss");
+
         PredictableGenerator generator = new PredictableGenerator();
         JdbcExpiringCodeStore store = webApplicationContext.getBean(JdbcExpiringCodeStore.class);
         store.setGenerator(generator);
@@ -177,6 +182,8 @@ public class AccountsControllerIntegrationTest {
 
     @Test
     public void testCreatingAnAccountWithClientRedirect() throws Exception {
+        mockMvcWithBrand("oss");
+
         PredictableGenerator generator = new PredictableGenerator();
         JdbcExpiringCodeStore store = webApplicationContext.getBean(JdbcExpiringCodeStore.class);
         store.setGenerator(generator);
