@@ -278,7 +278,7 @@
 
     <bean id="customWebTemplateResolver" class="org.thymeleaf.templateresolver.TemplateResolver">
         <property name="resourceResolver" ref="springResourceResourceResolver"/>
-        <property name="prefix" value="${login.templatesUrl:classpath:/templates}/web/" />
+        <property name="prefix" value="${login.templatesBaseUrl:classpath:/templates}/web/" />
         <property name="suffix" value=".html"/>
         <property name="templateMode" value="HTML5"/>
         <property name="order" value="1"/>
@@ -294,7 +294,7 @@
 
     <bean id="customMailTemplateResolver" class="org.thymeleaf.templateresolver.TemplateResolver">
         <property name="resourceResolver" ref="springResourceResourceResolver"/>
-        <property name="prefix" value="${login.templatesUrl:classpath:/templates}/mail/" />
+        <property name="prefix" value="${login.templatesBaseUrl:classpath:/templates}/mail/" />
         <property name="suffix" value=".html" />
         <property name="templateMode" value="HTML5" />
         <property name="order" value="1"/>
