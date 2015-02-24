@@ -11,6 +11,7 @@ import org.cloudfoundry.identity.uaa.scim.ScimUserProvisioning;
 import org.cloudfoundry.identity.uaa.scim.exception.ScimResourceAlreadyExistsException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
+import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
@@ -35,7 +36,7 @@ public class EmailAccountCreationService implements AccountCreationService {
     private final SpringTemplateEngine templateEngine;
     private final MessageService messageService;
     private final String uaaBaseUrl;
-    private final Brand brand;
+    private final MessageSource messageSource;
     private final ObjectMapper objectMapper;
     private final String baseUrl;
     private final ExpiringCodeStore codeStore;
@@ -50,7 +51,7 @@ public class EmailAccountCreationService implements AccountCreationService {
         ScimUserProvisioning scimUserProvisioning,
         ClientDetailsService clientDetailsService,
         String uaaBaseUrl,
-        Brand brand,
+        MessageSource messageSource,
         String baseUrl) {
 
         this.objectMapper = objectMapper;
@@ -60,7 +61,7 @@ public class EmailAccountCreationService implements AccountCreationService {
         this.scimUserProvisioning = scimUserProvisioning;
         this.clientDetailsService = clientDetailsService;
         this.uaaBaseUrl = uaaBaseUrl;
-        this.brand = brand;
+        this.messageSource = messageSource;
         this.baseUrl = baseUrl;
     }
 
@@ -174,14 +175,14 @@ public class EmailAccountCreationService implements AccountCreationService {
     }
     
     private String getSubjectText() {
-        return "Activate your " + brand.getAccountName();
+        String accountName = messageSource.getMessage(BrandMessageKeys.ACCOUNT_NAME, null, null);
+        return messageSource.getMessage("mail.activate.subject", new Object[] {accountName}, null);
     }
 
     private String getEmailHtml(String code, String email) {
         String accountsUrl = baseUrl + "/verify_user";
 
         final Context ctx = new Context();
-        ctx.setVariable("brand", brand);
         ctx.setVariable("code", code);
         ctx.setVariable("email", email);
         ctx.setVariable("accountsUrl", accountsUrl);

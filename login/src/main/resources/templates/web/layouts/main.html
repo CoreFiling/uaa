@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" dir="ltr" lang="en" th:with="assetBaseUrl=${@environment.getProperty('assetBaseUrl','/resources/oss')}">
 <head>
-    <title th:inline="text">[[${brand.serviceName}]]</title>
+    <title th:inline="text">[[#{brand.serviceName}]]</title>
     <link href='/resources/pivotal/images/favicon.ico' th:href="@{${assetBaseUrl}+'/images/favicon.ico'}" rel='shortcut icon' />
     <meta charset='utf-8' />
     <meta name='author' content='Pivotal Software, Inc' />

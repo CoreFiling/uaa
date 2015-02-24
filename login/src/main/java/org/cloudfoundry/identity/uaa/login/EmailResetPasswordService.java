@@ -19,6 +19,7 @@ import org.cloudfoundry.identity.uaa.error.UaaException;
 import org.cloudfoundry.identity.uaa.scim.endpoints.PasswordResetEndpoints;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
+import org.springframework.context.MessageSource;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
@@ -45,14 +46,14 @@ public class EmailResetPasswordService implements ResetPasswordService {
     private final MessageService messageService;
     private final PasswordResetEndpoints passwordResetEndpoints;
     private final String uaaBaseUrl;
-    private final Brand brand;
+    private final MessageSource messageSource;
 
-    public EmailResetPasswordService(TemplateEngine templateEngine, MessageService messageService, PasswordResetEndpoints passwordResetEndpoints, String uaaBaseUrl, Brand brand) {
+    public EmailResetPasswordService(TemplateEngine templateEngine, MessageService messageService, PasswordResetEndpoints passwordResetEndpoints, String uaaBaseUrl, MessageSource messageSource) {
         this.templateEngine = templateEngine;
         this.messageService = messageService;
         this.passwordResetEndpoints = passwordResetEndpoints;
         this.uaaBaseUrl = uaaBaseUrl;
-        this.brand = brand;
+        this.messageSource = messageSource;
     }
 
     @Override
@@ -96,7 +97,8 @@ public class EmailResetPasswordService implements ResetPasswordService {
     }
 
     private String getSubjectText() {
-        return StringUtils.capitalize(brand.getAccountName()) + " password reset request";
+        String accountName = messageSource.getMessage(BrandMessageKeys.ACCOUNT_NAME, null, null);
+        return messageSource.getMessage("mail.reset_password.subject", new Object[] {accountName}, null);
     }
 
     @Override
@@ -121,7 +123,6 @@ public class EmailResetPasswordService implements ResetPasswordService {
         String resetUrl = ServletUriComponentsBuilder.fromCurrentContextPath().path("/reset_password").build().toUriString();
 
         final Context ctx = new Context();
-        ctx.setVariable("brand", brand);
         ctx.setVariable("code", code);
         ctx.setVariable("email", email);
         ctx.setVariable("resetUrl", resetUrl);
@@ -132,7 +133,6 @@ public class EmailResetPasswordService implements ResetPasswordService {
         String hostname = ServletUriComponentsBuilder.fromCurrentContextPath().build().getHost();
 
         final Context ctx = new Context();
-        ctx.setVariable("brand", brand);
         ctx.setVariable("email", email);
         ctx.setVariable("hostname", hostname);
         return templateEngine.process("reset_password_unavailable", ctx);

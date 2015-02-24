@@ -2,6 +2,7 @@ package org.cloudfoundry.identity.uaa.login;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.context.MessageSource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -19,18 +20,18 @@ public class EmailService implements MessageService {
 
     private final JavaMailSender mailSender;
     private final String loginUrl;
-    private final Brand brand;
+    private final MessageSource messageSource;
     private final String senderAddressIfSpecified;
 
-    public EmailService(JavaMailSender mailSender, String loginUrl, String senderAddressIfSpecified, Brand brand) {
+    public EmailService(JavaMailSender mailSender, String loginUrl, String senderAddressIfSpecified, MessageSource messageSource) {
         this.mailSender = mailSender;
         this.loginUrl = loginUrl;
         this.senderAddressIfSpecified = senderAddressIfSpecified;
-        this.brand = brand;
+        this.messageSource = messageSource;
     }
 
     private Address[] getSenderAddresses() throws AddressException, UnsupportedEncodingException {
-        String name = brand.getServiceName();
+        String name = messageSource.getMessage(BrandMessageKeys.SERVICE_NAME, null, null);
         String senderAddress = senderAddressIfSpecified;
         if (senderAddress == null) {
           String host = UriComponentsBuilder.fromHttpUrl(loginUrl).build().getHost();

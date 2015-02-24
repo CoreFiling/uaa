@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.cloudfoundry.identity.uaa.error.UaaException;
 import org.cloudfoundry.identity.uaa.scim.endpoints.ChangeEmailEndpoints;
+import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
@@ -17,13 +18,13 @@ public class EmailChangeEmailService implements ChangeEmailService {
 
     private final TemplateEngine templateEngine;
     private final MessageService messageService;
-    private final Brand brand;
+    private final MessageSource messageSource;
     private final ChangeEmailEndpoints endpoints;
 
-    public EmailChangeEmailService(TemplateEngine templateEngine, MessageService messageService, Brand brand, ChangeEmailEndpoints endpoints) {
+    public EmailChangeEmailService(TemplateEngine templateEngine, MessageService messageService, MessageSource messageSource, ChangeEmailEndpoints endpoints) {
         this.templateEngine = templateEngine;
         this.messageService = messageService;
-        this.brand = brand;
+        this.messageSource = messageSource;
         this.endpoints = endpoints;
     }
 
@@ -76,14 +77,13 @@ public class EmailChangeEmailService implements ChangeEmailService {
     }
 
     private String getSubjectText() {
-        return "Email change verification";
+        return messageSource.getMessage("mail.verify_email.subject", null, null);
     }
 
     private String getEmailChangeEmailHtml(String email, String newEmail, String code) {
         String verifyUrl = ServletUriComponentsBuilder.fromCurrentContextPath().path("/verify_email").build().toUriString();
 
         final Context ctx = new Context();
-        ctx.setVariable("brand", brand);
         ctx.setVariable("code", code);
         ctx.setVariable("newEmail", newEmail);
         ctx.setVariable("email", email);

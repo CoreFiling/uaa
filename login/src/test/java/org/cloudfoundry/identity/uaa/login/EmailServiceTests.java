@@ -3,6 +3,7 @@ package org.cloudfoundry.identity.uaa.login;
 import org.cloudfoundry.identity.uaa.login.util.FakeJavaMailSender;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.context.support.ResourceBundleMessageSource;
 
 import javax.mail.Address;
 import javax.mail.Message;
@@ -15,15 +16,18 @@ import static org.junit.Assert.assertThat;
 public class EmailServiceTests {
 
     private FakeJavaMailSender mailSender;
+    private ResourceBundleMessageSource messageSource;
 
     @Before
     public void setUp() throws Exception {
         mailSender = new FakeJavaMailSender();
+        messageSource = new ResourceBundleMessageSource();
     }
 
     @Test
     public void testSendOssMimeMessage() throws Exception {
-        EmailService emailService = new EmailService(mailSender, "http://login.example.com/login", null, BrandFactory.OSS);
+        messageSource.setBasenames("brand-oss");
+        EmailService emailService = new EmailService(mailSender, "http://login.example.com/login", null, messageSource);
 
         emailService.sendMessage(null, "user@example.com", MessageType.CHANGE_EMAIL, "Test Message", "<html><body>hi</body></html>");
 
@@ -40,7 +44,8 @@ public class EmailServiceTests {
 
     @Test
     public void testSendPivotalMimeMessage() throws Exception {
-        EmailService emailService = new EmailService(mailSender, "http://login.example.com/login", null, BrandFactory.PIVOTAL);
+        messageSource.setBasenames("brand-pivotal");
+        EmailService emailService = new EmailService(mailSender, "http://login.example.com/login", null, messageSource);
 
         emailService.sendMessage(null, "user@example.com", MessageType.CHANGE_EMAIL, "Test Message", "<html><body>hi</body></html>");
 
@@ -53,7 +58,8 @@ public class EmailServiceTests {
 
     @Test
     public void testUsesSpecifiedSenderAddressIfProvided() throws Exception {
-        EmailService emailService = new EmailService(mailSender, "http://login.example.com/login", "noreply@example.com", BrandFactory.PIVOTAL);
+        messageSource.setBasenames("brand-pivotal");
+        EmailService emailService = new EmailService(mailSender, "http://login.example.com/login", "noreply@example.com", messageSource);
 
         emailService.sendMessage(null, "user@example.com", MessageType.CHANGE_EMAIL, "Test Message", "<html><body>hi</body></html>");
 

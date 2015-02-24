@@ -10,6 +10,7 @@ import org.cloudfoundry.identity.uaa.scim.ScimUser;
 import org.cloudfoundry.identity.uaa.scim.ScimUserProvisioning;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.security.oauth2.common.util.RandomValueStringGenerator;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.client.BaseClientDetails;
@@ -39,19 +40,14 @@ public class EmailInvitationsService implements InvitationsService {
     @Autowired
     private ScimUserProvisioning scimUserProvisioning;
 
+    private MessageSource messageSource;
 
-    private Brand brand;
-
-    public EmailInvitationsService(SpringTemplateEngine templateEngine, MessageService messageService, Brand brand) {
+    public EmailInvitationsService(SpringTemplateEngine templateEngine, MessageService messageService, MessageSource messageSource) {
         this.templateEngine = templateEngine;
         this.messageService = messageService;
-        this.brand = brand;
+        this.messageSource = messageSource;
     }
 
-    public void setBrand(Brand brand) {
-        this.brand = brand;
-    }
-    
     @Autowired
     private AccountCreationService accountCreationService;
 
@@ -72,13 +68,13 @@ public class EmailInvitationsService implements InvitationsService {
     }
 
     private String getSubjectText() {
-        return "Invitation to join " + brand.getServiceName();
+        String serviceName = messageSource.getMessage(BrandMessageKeys.SERVICE_NAME, null, null);
+        return messageSource.getMessage("mail.invite.subject", new Object[] {serviceName}, null);
     }
 
     private String getEmailHtml(String currentUser, String code) {
         String accountsUrl = ServletUriComponentsBuilder.fromCurrentContextPath().path("/invitations/accept").build().toUriString();
         final Context ctx = new Context();
-        ctx.setVariable("brand", brand);
         ctx.setVariable("code", code);
         ctx.setVariable("currentUser", currentUser);
         ctx.setVariable("accountsUrl", accountsUrl);

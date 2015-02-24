@@ -91,7 +91,9 @@
       <property name="basenames">
         <list>
           <value>#{systemEnvironment['CLOUD_FOUNDRY_CONFIG_PATH']!=null ? 'file:'+systemEnvironment['CLOUD_FOUNDRY_CONFIG_PATH']+'/messages':'classpath:messages'}</value>
+          <value>classpath:mail</value>
           <value>classpath:messages</value>
+          <value>classpath:brand-{login.brand}</value>
         </list>
       </property>
     </bean>
