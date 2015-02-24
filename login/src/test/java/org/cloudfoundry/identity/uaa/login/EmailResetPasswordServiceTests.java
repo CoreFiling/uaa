@@ -22,6 +22,7 @@ import static org.mockito.Matchers.contains;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
 import org.cloudfoundry.identity.uaa.codestore.ExpiringCode;
 import org.cloudfoundry.identity.uaa.codestore.ExpiringCodeStore;
 import org.cloudfoundry.identity.uaa.error.UaaException;
@@ -39,6 +40,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.MessageSource;
+import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -49,6 +52,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.thymeleaf.spring4.SpringTemplateEngine;
+
 import scala.actors.threadpool.Arrays;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -61,6 +65,8 @@ public class EmailResetPasswordServiceTests {
     @Autowired
     @Qualifier("mailTemplateEngine")
     SpringTemplateEngine templateEngine;
+    @Autowired
+    ResourceBundleMessageSource messageSource;
     private PasswordResetEndpoints passwordResetEndpoints;
     private ExpiringCodeStore codeStore;
     private ScimUserProvisioning scimUserProvisioning;
@@ -72,7 +78,8 @@ public class EmailResetPasswordServiceTests {
         scimUserProvisioning = mock(ScimUserProvisioning.class);
         codeStore = mock(ExpiringCodeStore.class);
         passwordResetEndpoints = new PasswordResetEndpoints(new ObjectMapper(), scimUserProvisioning, codeStore);
-        emailResetPasswordService = new EmailResetPasswordService(templateEngine, messageService, passwordResetEndpoints, "http://uaa.example.com/uaa", BrandFactory.PIVOTAL);
+        emailResetPasswordService = new EmailResetPasswordService(templateEngine, messageService, passwordResetEndpoints, "http://uaa.example.com/uaa", messageSource);
+        messageSource.setBasenames("mail", "brand-pivotal");
     }
 
     @After
@@ -82,7 +89,6 @@ public class EmailResetPasswordServiceTests {
 
     @Test
     public void testForgotPasswordWhenAResetCodeIsReturnedByTheUaa() throws Exception {
-
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.setProtocol("http");
         request.setContextPath("/login");

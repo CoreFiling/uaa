@@ -18,6 +18,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+
 import org.cloudfoundry.identity.uaa.authentication.Origin;
 import org.cloudfoundry.identity.uaa.codestore.ExpiringCode;
 import org.cloudfoundry.identity.uaa.codestore.ExpiringCodeStore;
@@ -35,6 +36,8 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.MessageSource;
+import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.ClientDetails;
@@ -46,6 +49,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.thymeleaf.spring4.SpringTemplateEngine;
+
 import scala.actors.threadpool.Arrays;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -62,9 +66,12 @@ public class EmailAccountCreationServiceTests {
     private ExpiringCode code = null;
     private ClientDetails details = null;
 
-        @Autowired
+    @Autowired
     @Qualifier("mailTemplateEngine")
     SpringTemplateEngine templateEngine;
+
+    @Autowired
+    ResourceBundleMessageSource messageSource;
 
     @Before
     public void setUp() throws Exception {
@@ -83,7 +90,7 @@ public class EmailAccountCreationServiceTests {
             scimUserProvisioning,
             clientDetailsService,
             "http://uaa.example.com",
-            BrandFactory.PIVOTAL,
+            messageSource,
             "http://login.example.com"
         );
     }
@@ -95,7 +102,7 @@ public class EmailAccountCreationServiceTests {
 
     @Test
     public void testBeginActivation() throws Exception {
-        setUpForSuccess();
+        setUpForSuccess("pivotal");
 
         when(scimUserProvisioning.createUser(any(ScimUser.class),anyString())).thenReturn(user);
         when(codeStore.generateCode(anyString(), any(Timestamp.class))).thenReturn(code);
@@ -126,10 +133,10 @@ public class EmailAccountCreationServiceTests {
             scimUserProvisioning,
             clientDetailsService,
             "http://uaa.example.com",
-            BrandFactory.OSS,
+            messageSource,
             "http://login.example.com");
 
-        setUpForSuccess();
+        setUpForSuccess("oss");
 
         when(scimUserProvisioning.createUser(any(ScimUser.class),anyString())).thenReturn(user);
         when(codeStore.generateCode(anyString(), any(Timestamp.class))).thenReturn(code);
@@ -154,7 +161,7 @@ public class EmailAccountCreationServiceTests {
 
     @Test(expected = UaaException.class)
     public void testBeginActivationWithExistingUser() throws Exception {
-        setUpForSuccess();
+        setUpForSuccess("oss");
         user.setVerified(true);
         when(scimUserProvisioning.query(anyString())).thenReturn(Arrays.asList(new ScimUser[] {user}));
         when(scimUserProvisioning.createUser(any(ScimUser.class), anyString())).thenThrow(new ScimResourceAlreadyExistsException("duplicate"));
@@ -163,7 +170,7 @@ public class EmailAccountCreationServiceTests {
 
     @Test
     public void testBeginActivationWithUnverifiedExistingUser() throws Exception {
-        setUpForSuccess();
+        setUpForSuccess("oss");
         user.setId("existing-user-id");
         user.setVerified(false);
         when(scimUserProvisioning.query(anyString())).thenReturn(Arrays.asList(new ScimUser[] {user}));
@@ -189,7 +196,7 @@ public class EmailAccountCreationServiceTests {
 
     @Test
     public void testCompleteActivation() throws Exception {
-        setUpForSuccess();
+        setUpForSuccess("oss");
         when(scimUserProvisioning.createUser(any(ScimUser.class), anyString())).thenReturn(user);
         when(codeStore.generateCode(anyString(), any(Timestamp.class))).thenReturn(code);
         when(codeStore.retrieveCode("the_secret_code")).thenReturn(code);
@@ -219,7 +226,7 @@ public class EmailAccountCreationServiceTests {
 
     @Test
     public void testResendVerificationCode() throws Exception {
-        setUpForSuccess();
+        setUpForSuccess("pivotal");
         when(scimUserProvisioning.createUser(any(ScimUser.class),anyString())).thenReturn(user);
         when(codeStore.generateCode(anyString(), any(Timestamp.class))).thenReturn(code);
         when(codeStore.retrieveCode("the_secret_code")).thenReturn(code);
@@ -243,7 +250,8 @@ public class EmailAccountCreationServiceTests {
         assertThat(emailBody, not(containsString("Cloud Foundry")));
     }
 
-    private void setUpForSuccess() throws Exception {
+    private void setUpForSuccess(String brand) throws Exception {
+        messageSource.setBasenames("brand-" + brand, "mail");
         user = new ScimUser(
             "newly-created-user-id",
             "user@example.com",

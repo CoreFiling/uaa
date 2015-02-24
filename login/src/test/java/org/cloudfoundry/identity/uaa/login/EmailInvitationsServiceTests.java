@@ -23,6 +23,7 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 import com.sun.corba.se.impl.orb.ORBConfiguratorImpl;
+
 import org.cloudfoundry.identity.uaa.authentication.Origin;
 import org.cloudfoundry.identity.uaa.error.UaaException;
 import org.cloudfoundry.identity.uaa.login.test.ThymeleafConfig;
@@ -40,9 +41,11 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -86,6 +89,9 @@ public class EmailInvitationsServiceTests {
     MessageService messageService;
 
     @Autowired
+    ResourceBundleMessageSource messageSource;
+
+    @Autowired
     ScimUserProvisioning scimUserProvisioning;
 
     @Autowired
@@ -105,6 +111,8 @@ public class EmailInvitationsServiceTests {
 
     @Test
     public void testSendInviteEmail() throws Exception {
+        messageSource.setBasenames("mail", "brand-pivotal");
+
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.setProtocol("http");
         request.setContextPath("/login");
@@ -145,6 +153,7 @@ public class EmailInvitationsServiceTests {
     
     @Test
     public void testSendInviteEmailToUnverifiedUser() throws Exception {
+      messageSource.setBasenames("mail", "brand-pivotal");
     	
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setProtocol("http");
@@ -179,7 +188,8 @@ public class EmailInvitationsServiceTests {
 
     @Test
     public void testSendInviteEmailWithOSSBrand() throws Exception {
-        emailInvitationsService.setBrand(BrandFactory.OSS);
+        messageSource.setBasenames("mail", "brand-oss");
+        
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.setProtocol("http");
         request.setContextPath("/login");
@@ -239,6 +249,9 @@ public class EmailInvitationsServiceTests {
     @Import(ThymeleafConfig.class)
     static class ContextConfiguration extends WebMvcConfigurerAdapter {
 
+        @Autowired
+        private MessageSource messageSource;
+      
         @Override
         public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
             configurer.enable();
@@ -265,7 +278,7 @@ public class EmailInvitationsServiceTests {
 
         @Bean
         EmailInvitationsService emailInvitationsService() {
-            return new EmailInvitationsService(templateEngine, messageService(), BrandFactory.PIVOTAL);
+            return new EmailInvitationsService(templateEngine, messageService(), messageSource);
         }
 
         @Bean

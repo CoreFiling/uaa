@@ -10,6 +10,7 @@ import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
 import org.cloudfoundry.identity.uaa.error.UaaException;
 import org.cloudfoundry.identity.uaa.login.test.ThymeleafConfig;
 import org.cloudfoundry.identity.uaa.scim.endpoints.ChangeEmailEndpoints;
@@ -21,6 +22,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -43,6 +45,9 @@ public class EmailChangeEmailServiceTest {
     @Qualifier("mailTemplateEngine")
     SpringTemplateEngine templateEngine;
 
+    @Autowired
+    MessageSource messageSource;
+
     @After
     public void tearDown() throws Exception {
         SecurityContextHolder.clearContext();
@@ -53,7 +58,7 @@ public class EmailChangeEmailServiceTest {
         SecurityContextHolder.clearContext();
         endpoints = mock(ChangeEmailEndpoints.class);
         messageService = mock(EmailService.class);
-        emailChangeEmailService = new EmailChangeEmailService(templateEngine, messageService, BrandFactory.PIVOTAL, endpoints);
+        emailChangeEmailService = new EmailChangeEmailService(templateEngine, messageService, messageSource, endpoints);
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.setProtocol("http");
         request.setContextPath("/login");
@@ -78,7 +83,7 @@ public class EmailChangeEmailServiceTest {
 
     @Test
     public void testBeginEmailChangeWithOssBrand() throws Exception {
-        emailChangeEmailService = new EmailChangeEmailService(templateEngine, messageService, BrandFactory.OSS, endpoints);
+        emailChangeEmailService = new EmailChangeEmailService(templateEngine, messageService, messageSource, endpoints);
 
         when(endpoints.generateEmailVerificationCode(any(ChangeEmailEndpoints.EmailChange.class))).thenReturn(new ResponseEntity<>("the_secret_code", HttpStatus.CREATED));
         emailChangeEmailService.beginEmailChange("user-001", "user@example.com", "new@example.com", "app");
