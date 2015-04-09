@@ -22,7 +22,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.MessageSource;
+import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -46,7 +46,7 @@ public class EmailChangeEmailServiceTest {
     SpringTemplateEngine templateEngine;
 
     @Autowired
-    MessageSource messageSource;
+    ResourceBundleMessageSource messageSource;
 
     @After
     public void tearDown() throws Exception {
@@ -63,6 +63,7 @@ public class EmailChangeEmailServiceTest {
         request.setProtocol("http");
         request.setContextPath("/login");
         RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
+        messageSource.setBasenames("brand-pivotal", "mail");
     }
 
 
@@ -83,8 +84,7 @@ public class EmailChangeEmailServiceTest {
 
     @Test
     public void testBeginEmailChangeWithOssBrand() throws Exception {
-        emailChangeEmailService = new EmailChangeEmailService(templateEngine, messageService, messageSource, endpoints);
-
+        messageSource.setBasenames("brand-oss", "mail");
         when(endpoints.generateEmailVerificationCode(any(ChangeEmailEndpoints.EmailChange.class))).thenReturn(new ResponseEntity<>("the_secret_code", HttpStatus.CREATED));
         emailChangeEmailService.beginEmailChange("user-001", "user@example.com", "new@example.com", "app");
 
